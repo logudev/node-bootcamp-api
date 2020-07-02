@@ -7,7 +7,7 @@ const connectDB = require('./config/db');
 // const logger = require('./middleware/logger');
 
 // Route files
-const bootcamps = require('./routes/bootcamps');
+const bootcampRoute = require('./routes/bootcamps');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -18,6 +18,9 @@ connectDB();
 // Initialize express app
 const app = express();
 
+// Body Parser Middleware
+app.use(express.json());
+
 // Using logger middleware
 // app.use(logger);
 
@@ -27,7 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Mount Routes
-app.use('/api/v1/bootcamps', bootcamps);
+app.use('/api/v1/bootcamps', bootcampRoute);
 
 const PORT = process.env.PORT || 5000;
 

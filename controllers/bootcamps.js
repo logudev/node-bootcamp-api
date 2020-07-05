@@ -1,48 +1,37 @@
 const Bootcamp = require('../models/Bootcamp');
+const ErrorResponse = require('../utils/errorResponse');
+const asyncHandler = require('../middleware/asyncHandler');
 
 // @desc    Get all the bootcamps
 // @route   GET /api/v1/bootcamps
 // @access  Public
-exports.getBootCamps = async (req, res, next) => {
-  try {
-    const bootcamps = await Bootcamp.find();
-    res.status(200).json({
-      success: true,
-      count: bootcamps.length,
-      data: bootcamps,
-    });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
-  }
-};
+// The 2 GET routes alone use an asyncHandler to avoid try catch.
+// If you find comfortable, replace it in all controller methods.
+exports.getBootCamps = asyncHandler(async (req, res, next) => {
+  const bootcamps = await Bootcamp.find();
+  res.status(200).json({
+    success: true,
+    count: bootcamps.length,
+    data: bootcamps,
+  });
+});
 
 // @desc    Get single bootcamp
 // @route   GET /api/v1/bootcamps/:id
 // @access  Public
-exports.getBootCamp = async (req, res, next) => {
-  try {
-    const bootcamp = await Bootcamp.findById(req.params.id);
+exports.getBootCamp = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findById(req.params.id);
 
-    if (!bootcamp) {
-      return res.status(400).json({
-        success: false,
-        message: 'No bootcamp found with the id',
-      });
-    }
-    res.status(200).json({
-      success: true,
-      data: bootcamp,
-    });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp not found with id: ${req.params.id}`, 404)
+    );
   }
-};
+  res.status(200).json({
+    success: true,
+    data: bootcamp,
+  });
+});
 
 // @desc    Create new bootcamp
 // @route   POST /api/v1/bootcamps/
@@ -56,10 +45,7 @@ exports.createBootCamp = async (req, res, next) => {
       data: bootcamp,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+    next(err);
   }
 };
 
@@ -73,20 +59,16 @@ exports.updateBootCamp = async (req, res, next) => {
       runValidators: true,
     });
     if (!bootcamp) {
-      return res.status(400).json({
-        success: false,
-        message: 'No bootcamp found with the id',
-      });
+      return next(
+        new ErrorResponse(`Bootcamp not found with id: ${req.params.id}`, 404)
+      );
     }
     res.status(200).json({
       success: true,
       data: bootcamp,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+    next(err);
   }
 };
 
@@ -97,19 +79,15 @@ exports.deleteBootCamp = async (req, res, next) => {
   try {
     const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
     if (!bootcamp) {
-      return res.status(400).json({
-        success: false,
-        message: 'No bootcamp found with the id',
-      });
+      return next(
+        new ErrorResponse(`Bootcamp not found with id: ${req.params.id}`, 404)
+      );
     }
     res.status(200).json({
       success: true,
       data: {},
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+    next(err);
   }
 };
